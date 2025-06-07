@@ -1,0 +1,130 @@
+/* make look good later */
+
+body {
+    margin: 0px;
+    font-family: 'Abel', sans-serif;
+    height: 600px;
+    width:400px;
+    font-size: 16px;
+}
+
+.big-container {
+    display: grid;
+    grid-template-areas:
+        "logo settings"
+        "now-playing now-playing"
+        "part part"
+        "manual-entry manual-entry";
+    grid-template-columns: 1fr 1fr; 
+    grid-template-rows: 1fr 3fr 3fr 1fr;
+    margin: 5px;
+}
+
+.logo {
+    grid-area: logo;
+}
+.settings {
+    grid-area: settings;
+    text-align: right;
+}
+.now-playing {
+    grid-area: now-playing;
+}
+.part {
+    grid-area: part;
+}
+.manual-entry {
+    grid-area: manual-entry;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#options-button {
+    background-color: white;
+    border: none;
+    /* fix colour to match */
+}
+
+/* 
+
+
+
+.parts-container {
+    display: grid;
+
+    grid-template-areas:
+        "picture name"
+        "picture resume"
+        "links ."
+        "description description";
+        "logo"
+        ""
+        
+
+  
+    grid-template-columns: 1fr 3fr; 
+    grid-template-rows: 4fr 2fr 0.3fr 0.5fr;
+    background-color: aliceblue;
+    gap: 5px;
+    margin: 0px;
+    padding: 10px;
+}
+
+.grid-container-head > div.picture {
+    grid-area: picture;
+}
+.grid-container-head > div.name {
+    grid-area: name;
+    font-size: 60px;
+    align-self:end;
+    margin: 5px;
+}
+.grid-container-head > div.resume {
+    grid-area: resume;
+    margin: 5px;
+    align-self: start;
+}
+.grid-container-head > div.links {
+    grid-area: links;
+    align-self:start;
+}
+.grid-container-head > div.description {
+    grid-area: description;
+}
+
+.button-resume {
+    border: none;
+    color: white;
+    background-color: black;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    /* display: inline-block; 
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.2s;
+    cursor: pointer;
+}
+.button-resume:hover{
+    background-color:#222222;
+}
+
+.grid-container-pages {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    margin: 20px;
+    gap: 10px;
+}
+.grid-container-pages > a{
+    border: 2px solid black;
+    color: black;
+    padding: 5px;
+    text-decoration: none;
+    transition-duration: 0.2s;
+}
+.grid-container-pages > a:hover{
+    border: 2px solid #444;
+    /* border: 2px solid black; 
+    background-color: aliceblue;
+    text-decoration: none;
+} */

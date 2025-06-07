@@ -1,0 +1,41 @@
+{
+  "name": "Youtube Chrome Extension", 
+  "description": "change ",
+  "version": "1.0",
+  "manifest_version": 3,
+    "icons": {
+    "16": "images/test_image.png"
+  },
+  "content_scripts": [
+    {
+      "js": ["content.js", "popup.js"],
+      "matches": [
+        "https://www.youtube.com/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage", 
+    "activeTab"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "commands": {
+    "open-popup": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Hotkey to open popup."
+    }
+  },
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  }
+}
