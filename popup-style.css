@@ -3,8 +3,8 @@
 body {
     margin: 0px;
     font-family: 'Abel', sans-serif;
-    height: 600px;
-    width:400px;
+    height: 500px;
+    width: 400px;
     font-size: 16px;
 }
 
@@ -13,10 +13,10 @@ body {
     grid-template-areas:
         "logo settings"
         "now-playing now-playing"
-        "part part"
+        "part-container part-container"
         "manual-entry manual-entry";
     grid-template-columns: 1fr 1fr; 
-    grid-template-rows: 1fr 3fr 3fr 1fr;
+    grid-template-rows: 2fr 5fr 5fr 1fr;
     margin: 5px;
 }
 
@@ -29,9 +29,19 @@ body {
 }
 .now-playing {
     grid-area: now-playing;
+    align-self: center;
 }
-.part {
-    grid-area: part;
+.part-container {
+    grid-area: part-container;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: 1fr;
+    grid-auto-columns: 1fr;
+    gap: 10px;
+    align-items: center;
+}
+.part{
+    text-align: center;
 }
 .manual-entry {
     grid-area: manual-entry;
@@ -44,6 +54,7 @@ body {
     border: none;
     /* fix colour to match */
 }
+
 
 /* 
 

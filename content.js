@@ -1,6 +1,6 @@
 // //wrap all in big function and make it manual for now :(
 
-const youtubeApiKey = "PUT API KEY HERE";
+const youtubeApiKey = "";
 
 function getVideoID(){
     // get video id of current tab from url
@@ -31,6 +31,7 @@ async function getFinalTimestamps(comments, numParts){
             return timestamps;
         }
     }
+    return false;
 }
 
 //
@@ -43,33 +44,105 @@ async function getFinalTimestamps(comments, numParts){
 //
 
 //return textOriginal
-async function getTopLevelComments(videoID){
-    console.log("getting top level comments")
-    let nextPageToken = "";
+async function getTopLevelComments(videoID, nextPageToken){
+    console.log(`getting top level comments`);
     const maxResults = 100;
-    const topLevelComments = []; 
-    do{
-        const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet&maxResults=${maxResults}&order=relevance&videoId=${videoID}&key=${youtubeApiKey}&pageToken=${nextPageToken}`);
-        const callResponseJSON = await callResponse.json();
-        const pageComments = callResponseJSON.items.map(comment => comment.snippet.topLevelComment.snippet.textOriginal);
-        topLevelComments.push(...pageComments); //makes it not push entire list, only entires
-        nextPageToken = callResponseJSON.nextPageToken || "";
-        // console.log(`top level: ${topLevelComments}, cur: ${pageComments}, nxtpgtkn: ${nextPageToken}`);
-    } while(nextPageToken!="");
-    console.log(`all comments: ${topLevelComments}`);
-    return topLevelComments;
+
+    const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet&maxResults=${maxResults}&order=relevance&videoId=${videoID}&key=${youtubeApiKey}&pageToken=${nextPageToken}`);
+    const callResponseJSON = await callResponse.json();
+    const pageComments = callResponseJSON.items.map(comment => comment.snippet.topLevelComment.snippet.textOriginal);
+    nextPageToken = callResponseJSON.nextPageToken || "";
+
+    console.log(`comments with token "${nextPageToken}": ${pageComments}`);
+    return {comments: pageComments, token: nextPageToken};
 }
+
+
+function timeToSeconds(str) {
+  str = String(str);
+  let list = str.split(':');
+  let total = 0, m = 1;
+
+  while (list.length > 0) {
+    total += m * parseInt(list.pop(), 10);
+    m *= 60;
+  }
+
+  return total;
+}
+
+function timestampsToSeconds(timestamps){
+    converted = [];
+    for(timestamp of timestamps){
+        converted.push(String(timeToSeconds(timestamp)));
+    }
+    return converted;
+}
+
+function skipToTime(time){
+    //need to update this if DOM changes, get by class
+    const youtubePlayer = document.getElementsByClassName('video-stream html5-main-video')[0];
+    youtubePlayer.currentTime = time;
+}
+
+
+// async function seeIfTSWorks(){
+//     currentVideoID = await getVideoID(); //update global video id
+//     // call api to get video title, no need for async //
+    
+//     const topLevelComments = await getTopLevelComments(currentVideoID);
+//     const finalTimestamps = await getFinalTimestamps(topLevelComments, 1);
+//     console.log(finalTimestamps);
+//     console.log("see if works done");
+//     return;
+// }
 
 async function seeIfTSWorks(){
     currentVideoID = await getVideoID(); //update global video id
-    // call api to get video title, no need for async //
     currentVideoTitle = await getVideoTitle(currentVideoID);
-    const topLevelComments = await getTopLevelComments(currentVideoID);
-    const finalTimestamps = await getFinalTimestamps(topLevelComments, 1);
-    console.log(finalTimestamps);
-    console.log("see if works done");
-    return;
+    //usually 3 or 4;
+    for(let numMvt = 1; numMvt > 0; numMvt--){
+        const finalTimestamps = await tryGetTimestamps(currentVideoID, numMvt);
+        if(finalTimestamps){
+            // currentVideoTitle = await getVideoTitle(currentVideoID);
+
+            console.log(`final timestamps: ${finalTimestamps}`);
+
+            // finalTimestamps = ['0:12', '03:14', '4:35'];
+            timestamps = finalTimestamps;
+            timestampsSeconds = timestampsToSeconds(finalTimestamps);
+            console.log(`tts: ${timestampsSeconds}`);
+            console.log("see if works done");
+            // skipToTime(40);
+            // console.log("skipped");
+            return;
+        }
+    }
+
 }
+
+async function tryGetTimestamps(currentVideoID, numMvt){
+    // call api to get video title, no need for async //
+    let nextPageToken = "";
+    let finalTimestamps = false;
+    do{
+        const response = await getTopLevelComments(currentVideoID, nextPageToken);
+        const topLevelComments = response.comments;
+        nextPageToken = response.token;
+        finalTimestamps = await getFinalTimestamps(topLevelComments, numMvt);
+        // if(finalTimestamps != false){ //if returns a list of timestamps, stop
+        //     timestampsFound = true;
+        // }
+    } while(nextPageToken!="" && !finalTimestamps);
+    
+    if(!finalTimestamps){
+        return false;
+    }else{
+        return finalTimestamps;
+    }
+}
+
+
 
 async function getVideoTitle(videoID){
     const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&key=${youtubeApiKey}`);
@@ -80,16 +153,17 @@ async function getVideoTitle(videoID){
 
 
 
-
 //////////////////////////////////////////
 
 
 console.log("script began running");
 
 //global vairables
-const currentVideoURL = new URL(window.location.href);
+const currentVideoURL = new URL(window.location.href); //there is doop below, fix later
 let currentVideoID;
 let currentVideoTitle;
+let timestamps;
+let timestampsSeconds;
 
 seeIfTSWorks();
 
@@ -143,7 +217,9 @@ videoChangeObserver.observe(document.body, {childList: true});
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
     console.log("message recieved");
-    if (request.message === "getVideoID")
-      sendResponse({reply: currentVideoTitle});
+    if (request.message === "getInfo")
+      sendResponse({title: currentVideoTitle, timestamps: timestamps, timestampsSeconds: timestampsSeconds, url: String(currentURL)});
+    if (request.message === "seek")
+      skipToTime(request.seconds);
   }
 );
