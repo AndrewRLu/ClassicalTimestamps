@@ -1,6 +1,7 @@
 // //wrap all in big function and make it manual for now :(
 
-const youtubeApiKey = "";
+// const youtubeApiKey=`${process.env.YOUTUBE_API_KEY}`;
+
 
 function getVideoID(){
     // get video id of current tab from url
@@ -44,6 +45,8 @@ async function getFinalTimestamps(comments, numParts){
 //
 
 //return textOriginal
+
+//old getTopLevelComments w/o serverless
 async function getTopLevelComments(videoID, nextPageToken){
     console.log(`getting top level comments`);
     const maxResults = 100;
@@ -99,9 +102,23 @@ function skipToTime(time){
 
 async function seeIfTSWorks(){
     currentVideoID = await getVideoID(); //update global video id
-    currentVideoTitle = await getVideoTitle(currentVideoID);
+    // currentVideoTitle = await getVideoTitle(currentVideoID);
+    currentVideoTitle = await fetch('https://ytchromeext.netlify.app/.netlify/functions/getVideoTitle', {
+        method: 'POST', 
+        headers: {
+            'Content-Type': 'application/json', 
+        },
+        body: JSON.stringify({ 
+            videoID: currentVideoID  
+        }),
+    });
+
+    currentVideoTitle = await currentVideoTitle.json();
+    currentVideoTitle = currentVideoTitle.title;
+    console.log(currentVideoTitle);
+
     //usually 3 or 4;
-    for(let numMvt = 1; numMvt > 0; numMvt--){
+    for(let numMvt = 4; numMvt > 0; numMvt--){
         const finalTimestamps = await tryGetTimestamps(currentVideoID, numMvt);
         if(finalTimestamps){
             // currentVideoTitle = await getVideoTitle(currentVideoID);
@@ -121,20 +138,54 @@ async function seeIfTSWorks(){
 
 }
 
-async function tryGetTimestamps(currentVideoID, numMvt){
-    // call api to get video title, no need for async //
+// async function tryGetTimestamps(currentVideoID, numMvt){ //without serverless
+//     // call api to get video title, no need for async //
+//     let nextPageToken = "";
+//     let finalTimestamps = false;
+//     do{
+//         const response = await getTopLevelComments(currentVideoID, nextPageToken);
+//         const topLevelComments = response.comments;
+//         nextPageToken = response.token;
+//         finalTimestamps = await getFinalTimestamps(topLevelComments, numMvt);
+//         // if(finalTimestamps != false){ //if returns a list of timestamps, stop
+//         //     timestampsFound = true;
+//         // }
+//     } while(nextPageToken!="" && !finalTimestamps);
+    
+//     if(!finalTimestamps){
+//         return false;
+//     }else{
+//         return finalTimestamps;
+//     }
+// }
+
+async function tryGetTimestamps(currentVideoID, numMvt){ 
+    //with serverless
     let nextPageToken = "";
     let finalTimestamps = false;
+
     do{
-        const response = await getTopLevelComments(currentVideoID, nextPageToken);
-        const topLevelComments = response.comments;
-        nextPageToken = response.token;
+        const response = await fetch('https://ytchromeext.netlify.app/.netlify/functions/getTopLevelComments', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json', 
+            },
+            body: JSON.stringify({ 
+                videoID: currentVideoID,  
+                nextPageToken: nextPageToken 
+            }),
+        });
+
+        const responseJSON = await response.json();
+        // console.log(responseJSON);
+        const topLevelComments = responseJSON.comments;
+        nextPageToken = responseJSON.token;
+        npt = responseJSON.nextPageToken;
         finalTimestamps = await getFinalTimestamps(topLevelComments, numMvt);
-        // if(finalTimestamps != false){ //if returns a list of timestamps, stop
-        //     timestampsFound = true;
-        // }
-    } while(nextPageToken!="" && !finalTimestamps);
-    
+
+    } while(nextPageToken!="" && !finalTimestamps); 
+        // console.log(npt);
+
     if(!finalTimestamps){
         return false;
     }else{
@@ -142,8 +193,7 @@ async function tryGetTimestamps(currentVideoID, numMvt){
     }
 }
 
-
-
+//TURN THIS ONE INTO A SERVERLESS AS WELL//////////////////////
 async function getVideoTitle(videoID){
     const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&key=${youtubeApiKey}`);
     const callResponseJSON = await callResponse.json();
