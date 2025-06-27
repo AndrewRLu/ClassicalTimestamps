@@ -5,12 +5,13 @@ export const handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': 'https://www.youtube.com'
+        'Access-Control-Allow-Origin': 'https://www.youtube.com',
+        'Access-Control-Allow-Headers': 'content-type'
         }
     };
   }
 
-  
+
   //youtube api req
   const maxResults = 100;
   const youtubeApiKey = process.env.YOUTUBE_API_KEY;
