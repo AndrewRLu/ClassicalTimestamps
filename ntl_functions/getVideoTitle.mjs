@@ -12,10 +12,11 @@ export const handler = async (event, context) => {
   }
 
   //youtube api req
-  const { videoID } = JSON.parse(event.body)
+  const { videoID } = JSON.parse(event.body);
   const youtubeApiKey = process.env.YOUTUBE_API_KEY;
   const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&key=${youtubeApiKey}`);
   const callResponseJSON = await callResponse.json();
+  console.log(callResponseJSON.items[0].snippet.title);
 
   return {
     statusCode: 200,
@@ -24,7 +25,7 @@ export const handler = async (event, context) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      response: callResponseJSON.items[0].snippet.title
+      title: callResponseJSON.items[0].snippet.title
     }),
   }
 }
