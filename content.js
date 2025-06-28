@@ -101,6 +101,7 @@ function skipToTime(time){
 // }
 
 async function seeIfTSWorks(){
+    console.log("seeifitworks run")
     currentVideoID = await getVideoID(); //update global video id
     // currentVideoTitle = await getVideoTitle(currentVideoID);
     currentVideoTitle = await fetch('https://ytchromeext.netlify.app/.netlify/functions/getVideoTitle', {
@@ -193,23 +194,23 @@ async function tryGetTimestamps(currentVideoID, numMvt){
     }
 }
 
-//TURN THIS ONE INTO A SERVERLESS AS WELL//////////////////////
-async function getVideoTitle(videoID){
-    const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&key=${youtubeApiKey}`);
-    const callResponseJSON = await callResponse.json();
-    console.log(callResponseJSON.items[0].snippet.title);
-    return callResponseJSON.items[0].snippet.title;
-}
+
+// async function getVideoTitle(videoID){
+//     const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&key=${youtubeApiKey}`);
+//     const callResponseJSON = await callResponse.json();
+//     console.log(callResponseJSON.items[0].snippet.title);
+//     return callResponseJSON.items[0].snippet.title;
+// }
 
 
 
-//////////////////////////////////////////
+///////////////////SCRIPT FOR FIRST TIME RAN///////////////////////
 
 
 console.log("script began running");
 
 //global vairables
-const currentVideoURL = new URL(window.location.href); //there is doop below, fix later
+let currentVideoURL = new URL(window.location.href); 
 let currentVideoID;
 let currentVideoTitle;
 let timestamps;
@@ -245,16 +246,16 @@ seeIfTSWorks();
 
 //detect going to new youtube video while currently on video
 
-let currentURL = window.location.href;
+let timer; //debounce
 const videoChangeObserver = new MutationObserver(() => {
-    if(currentURL != window.location.href){
-        currentURL = window.location.href;
+    if(currentVideoURL != new URL(window.location.href)){
+        clearTimeout(timer);
+        currentVideoURL = new URL(window.location.href);
         console.log("video changed");
-        // REPLACE WITH ACTUAL FUNCTION LATER
+        timer = setTimeout(() => seeIfTSWorks(), 1000);
     }
 }
 );
-
 
 //youtube is SPA, when new video, body updates; detect when change to body
 videoChangeObserver.observe(document.body, {childList: true});
@@ -268,7 +269,7 @@ chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
     console.log("message recieved");
     if (request.message === "getInfo")
-      sendResponse({title: currentVideoTitle, timestamps: timestamps, timestampsSeconds: timestampsSeconds, url: String(currentURL)});
+      sendResponse({title: currentVideoTitle, timestamps: timestamps, timestampsSeconds: timestampsSeconds, url: String(currentVideoURL)});
     if (request.message === "seek")
       skipToTime(request.seconds);
   }
