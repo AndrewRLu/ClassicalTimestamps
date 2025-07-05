@@ -1,5 +1,6 @@
 function getVideoID(){
   // get video id of current tab from url
+  console.log(currentVideoURL);
   const videoID = currentVideoURL.searchParams.get("v");
   console.log(`video id obtained: ${videoID}`);
   return videoID;
@@ -20,9 +21,10 @@ async function getFinalTimestamps(comments, numParts){
   // return false if none found
   for (let comment of comments){
     const timestamps = await getTimestampsFromComment(comment);
-    if(timestamps.length >= numParts){
+    if(timestamps.length >= numParts && timestamps.length < 5){
       // return timestamps;
       console.log("comment found")
+      console.log(comment);
       for(let x of timestamps){
         console.log(x);
       }
@@ -120,7 +122,7 @@ async function seeIfTSWorks(){
     console.log(timestamps);
     timestampsSeconds = timestampsToSeconds(timestamps);
     console.log(timestampsSeconds);
-    currentVideoURL = retrievedInfo[currentVideoID].videoLink;
+    currentVideoURL = new URL(retrievedInfo[currentVideoID].videoLink);
   }else{
     console.log("not found");
     currentVideoTitle = await fetch('https://ytchromeext.netlify.app/.netlify/functions/getVideoTitle', {
@@ -138,7 +140,7 @@ async function seeIfTSWorks(){
     console.log(currentVideoTitle);
 
     //usually 3 or 4;
-    for(let numMvt = 4; numMvt > 0; numMvt--){
+    for(let numMvt = 3; numMvt > 0; numMvt--){
       const finalTimestamps = await tryGetTimestamps(currentVideoID, numMvt);
       if(finalTimestamps){
         // currentVideoTitle = await getVideoTitle(currentVideoID);
@@ -303,11 +305,16 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       `Storage key "${key}" in namespace "${namespace}" changed.`,
       `Old value was "${JSON.stringify(oldValue)}", new value is "${JSON.stringify(newValue)}".`
     );
-    currentVideoTitle = newValue.title;
-    timestamps = getTimestampsFromComment(newValue.timestamps);
-    // console.log(timestamps);
-    timestampsSeconds = timestampsToSeconds(timestamps);
-    // console.log(timestampsSeconds);
-    currentVideoURL = newValue.videoLink;
+    if(newValue === undefined){
+      console.log("nothing saved, run again");
+      seeIfTSWorks();
+    }else{
+      currentVideoTitle = newValue.title;
+      timestamps = getTimestampsFromComment(newValue.timestamps);
+      // console.log(timestamps);
+      timestampsSeconds = timestampsToSeconds(timestamps);
+      // console.log(timestampsSeconds);
+      currentVideoURL = new URL(newValue.videoLink);
+    }
   }
 });
