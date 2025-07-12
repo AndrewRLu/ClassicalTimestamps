@@ -43,11 +43,21 @@ document.querySelector('#saved-timestamps-button').addEventListener('click', fun
 });
 
 // make buttons for parts work, id will be seconds
-document.querySelector('.part-container').addEventListener('click', (event) => {
+document.querySelector('.part-container').addEventListener('click', async (event) => {
   console.log("i cliekd buttoned");
   console.log(event.target.id);
   // id is time in seconds
-  requestSeek(event.target.id);
+  if(event.target.id == 'save-timestamps-btn'){
+    const timestampsString = timestamps.join(', ');
+    console.log(timestampsString);
+    document.getElementById("save-timestamps-btn").innerText = "Timestamps Saved!";
+    await chrome.storage.sync.set({ [videoID]: {'timestamps':timestampsString, 'videoLink':url , 'title':videoTitle}}).then(() => {
+      console.log("Value is set");
+      const timer = setTimeout(() => document.getElementById("save-timestamps-btn").innerText = "Save Timestamps", 2000);
+    });
+  }else if(event.target.className != 'part-container'){
+    requestSeek(event.target.id);
+  }
 });
 
 async function requestSeek(time){
@@ -81,10 +91,18 @@ function createButtons(timestamps, timestampsSeconds){
     btn.setAttribute('id', `${timestampS}`);
     container.appendChild(btn);
   }
+  //save button
+  const btn = document.createElement("button");
+  btn.textContent = `Save Timestamps`;
+  btn.setAttribute('id', `save-timestamps-btn`);
+  container.appendChild(btn);
 }
 
 async function setVideoTitle(videoTitle){
-  document.getElementById("title").textContent = videoTitle;
+  document.getElementById("title1").textContent = videoTitle;
+  document.getElementById("title2").textContent = videoTitle;
+  document.getElementById("title1div").textContent = " | ";
+  document.getElementById("title2div").textContent = " | ";
   console.log("done setting");
 }
 
@@ -188,9 +206,9 @@ document.querySelector('.manual-entry').addEventListener("submit", async (event)
 });
 
 function createNewButtons(input){
-  const userTimestamps = getTimestampsFromComment(input);
-  const userTimestampsSecond = timestampsToSeconds(userTimestamps);
-  createButtons(userTimestamps, userTimestampsSecond);
+  timestamps = getTimestampsFromComment(input);
+  timestampsSeconds = timestampsToSeconds(timestamps);
+  createButtons(timestamps, timestampsSeconds);
   console.log("new buttons created");
 }
 

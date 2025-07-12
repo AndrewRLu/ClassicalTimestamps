@@ -6,7 +6,10 @@
     </head>
     <body>
         <div class="big-container">
-            <div class="logo">logo</div>
+            <div class="logo_area">
+                <img id="logo" src="images/logo.jpg">
+                <img id="name_text" src="images/name_text.jpg">
+            </div>
                 <!-- <p id="burgers">asd</p> -->
             <div class="settings">
                 <button id="saved-timestamps-button">
@@ -18,9 +21,17 @@
                 </button>
             </div>
             <div class="now-playing">Now playing: 
-                <p id="title"></p>
+                <div class="scrolling-loop-container">
+                    <div class="scrolling-content">
+                        <p id="title1"></p>
+                        <p id="title1div"></p>
+                        <p id="title2"></p>
+                        <p id="title2div"></p>
+                    </div>
+                </div>
             </div>
             <div class="part-container">
+                Getting timestamps...
             </div>
             <div class="manual-entry">
                 <a class="saved-timestamps" id="manual-button">Not the correct timestamps?</a> 

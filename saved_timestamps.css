@@ -17,7 +17,6 @@ ul li {
   background: #eee;
   font-size: 18px;
   transition: 0.2s;
-
   /* make the list items unselectable */
   /* -webkit-user-select: none;
   -moz-user-select: none;
@@ -35,6 +34,9 @@ ul li:hover {
   background: #ddd;
 }
 
+.title{
+  width: 45%;
+}
 /* When clicked on, add a background color and strike out text */
 /* ul li.checked {
   background: #888;
@@ -79,7 +81,7 @@ ul li:hover {
 
 /* Style the header */
 .header {
-  background-color: #f44336;
+  background-color: #FF0000;
   padding: 30px 40px;
   color: white;
   text-align: center;

@@ -17,12 +17,15 @@ function createUL(){
   for(const key in videos){
     console.log(key);
     const myLI = document.createElement("li");
+    const myTitle = document.createElement("div");
     const myLink = document.createElement("a");
     const myTimestamps = document.createElement("div");
     myLink.setAttribute('href', `${videos[key]['videoLink']}`);
     myLink.setAttribute('target', `_blank`);
     myLink.textContent = `${videos[key]['title']}`; //title
-    myLI.appendChild(myLink);
+    myTitle.setAttribute('class', 'title');
+    myTitle.appendChild(myLink);
+    myLI.appendChild(myTitle);
     myTimestamps.textContent = `${videos[key]['timestamps']}`; //timestamps
     myTimestamps.setAttribute('class', 'timestamp');
     myLI.appendChild(myTimestamps);
