@@ -34,6 +34,40 @@ async function getFinalTimestamps(comments, numParts){
   return false;
 }
 
+async function getTimestampsFromDescription(currentVideoID){
+  const response = await fetch('https://ytchromeext.netlify.app/.netlify/functions/getDescription', {
+    method: 'POST', 
+    headers: {
+      'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify({ 
+      videoID: currentVideoID,  
+    }),
+  });
+  const responseJSON = await response.json();
+  const description = responseJSON.description;
+  const lines = description.split("\n");
+  const timestamps = [];
+  for(const line of lines){
+    // console.log(line);
+    const timestampsOfLine = getTimestampsFromComment(line);        
+    if(timestampsOfLine.length > 0){
+      if(timestampsOfLine.length == 2){
+        //only want first, e.g. 0:00-0:30
+        timestamps.push(timestampsOfLine[0]);
+      } else {
+        timestamps.push(...timestampsOfLine);
+      }
+    }
+  }
+  if(timestamps.length >= 3){
+    //check if enough movements
+    return timestamps;
+  }else{
+    return false;
+  }
+}
+
 //
 
 
@@ -45,19 +79,19 @@ async function getFinalTimestamps(comments, numParts){
 
 //return textOriginal
 
-//old getTopLevelComments w/o serverless
-async function getTopLevelComments(videoID, nextPageToken){
-  console.log(`getting top level comments`);
-  const maxResults = 100;
+// //old getTopLevelComments w/o serverless
+// async function getTopLevelComments(videoID, nextPageToken){
+//   console.log(`getting top level comments`);
+//   const maxResults = 100;
 
-  const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet&maxResults=${maxResults}&order=relevance&videoId=${videoID}&key=${youtubeApiKey}&pageToken=${nextPageToken}`);
-  const callResponseJSON = await callResponse.json();
-  const pageComments = callResponseJSON.items.map(comment => comment.snippet.topLevelComment.snippet.textOriginal);
-  nextPageToken = callResponseJSON.nextPageToken || "";
+//   const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet&maxResults=${maxResults}&order=relevance&videoId=${videoID}&key=${youtubeApiKey}&pageToken=${nextPageToken}`);
+//   const callResponseJSON = await callResponse.json();
+//   const pageComments = callResponseJSON.items.map(comment => comment.snippet.topLevelComment.snippet.textOriginal);
+//   nextPageToken = callResponseJSON.nextPageToken || "";
 
-  console.log(`comments with token "${nextPageToken}": ${pageComments}`);
-  return {comments: pageComments, token: nextPageToken};
-}
+//   console.log(`comments with token "${nextPageToken}": ${pageComments}`);
+//   return {comments: pageComments, token: nextPageToken};
+// }
 
 
 function timeToSeconds(str) {
@@ -139,9 +173,27 @@ async function seeIfTSWorks(){
     currentVideoTitle = currentVideoTitle.title;
     console.log(currentVideoTitle);
 
-    //usually 3 or 4;
+    //try description first
+    const descriptionTimestamps = await getTimestampsFromDescription(currentVideoID);
+    if(descriptionTimestamps){
+      // currentVideoTitle = await getVideoTitle(currentVideoID);
+
+      console.log(`final timestamps: ${descriptionTimestamps}`);
+
+      // finalTimestamps = ['0:12', '03:14', '4:35'];
+      timestamps = descriptionTimestamps;
+      timestampsSeconds = timestampsToSeconds(descriptionTimestamps);
+      console.log(`tts: ${timestampsSeconds}`);
+      console.log("see if works done");
+      // skipToTime(40);
+      // console.log("skipped");
+      return;
+    }
+
+
+    //then try comments, usually 3 or 4;
     for(let numMvt = 3; numMvt > 0; numMvt--){
-      const finalTimestamps = await tryGetTimestamps(currentVideoID, numMvt);
+      const finalTimestamps = await getTimestampsFromComments(currentVideoID, numMvt);
       if(finalTimestamps){
         // currentVideoTitle = await getVideoTitle(currentVideoID);
 
@@ -182,7 +234,7 @@ async function seeIfTSWorks(){
 //   }
 // }
 
-async function tryGetTimestamps(currentVideoID, numMvt){ 
+async function getTimestampsFromComments(currentVideoID, numMvt){ 
   //with serverless
   let nextPageToken = "";
   let finalTimestamps = false;
