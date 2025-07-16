@@ -1,5 +1,3 @@
-/* make look good later */
-
 body {
   margin: 0px;
   height: 600px;
@@ -70,9 +68,6 @@ body {
   0% {
     transform: translateX(0);
   }
-  /* 80% {
-    transform: translateX(-50%);
-  } */
   100% {
     transform: translateX(-50%);
   }
@@ -109,20 +104,6 @@ body {
   padding-top: 10px;
 }
 
-#options-button {
-  position: relative;
-  top: 11px;
-  right: 5px;
-  background-color: whitesmoke;
-  border: none;
-  /* fix colour to match */
-}
-#options-button:hover{
-  background-color: whitesmoke;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-  border-radius: 4px;
-}
-
 #saved-timestamps-button {
   position: relative;
   top: 11px;
@@ -136,116 +117,3 @@ body {
   box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
   border-radius: 4px;
 }
-
-/* #save-timestamps-btn{
-  text-align: center;
-  padding: 10px 20px;
-  background-color: whitesmoke;
-  color: black;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px; 
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-}
-.save-timestamps-btn:hover{
-  background-color: gainsboro;
-} */
-/* 
-.part{
-  text-align: center;
-  padding: 10px 20px;
-  background-color: whitesmoke;
-  color: black;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px; 
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-}
-.part:hover{
-  background-color: gainsboro;
-} */
-
-
-/* 
-
-
-
-.parts-container {
-  display: grid;
-
-  grid-template-areas:
-    "picture name"
-    "picture resume"
-    "links ."
-    "description description";
-    "logo"
-    ""
-    
-
-  
-  grid-template-columns: 1fr 3fr; 
-  grid-template-rows: 4fr 2fr 0.3fr 0.5fr;
-  background-color: aliceblue;
-  gap: 5px;
-  margin: 0px;
-  padding: 10px;
-}
-
-.grid-container-head > div.picture {
-  grid-area: picture;
-}
-.grid-container-head > div.name {
-  grid-area: name;
-  font-size: 60px;
-  align-self:end;
-  margin: 5px;
-}
-.grid-container-head > div.resume {
-  grid-area: resume;
-  margin: 5px;
-  align-self: start;
-}
-.grid-container-head > div.links {
-  grid-area: links;
-  align-self:start;
-}
-.grid-container-head > div.description {
-  grid-area: description;
-}
-
-.button-resume {
-  border: none;
-  color: white;
-  background-color: black;
-  padding: 16px 32px;
-  text-align: center;
-  text-decoration: none;
-  /* display: inline-block; 
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.2s;
-  cursor: pointer;
-}
-.button-resume:hover{
-  background-color:#222222;
-}
-
-.grid-container-pages {
-  display: grid;
-  grid-template-columns: 33% 33% 33%;
-  margin: 20px;
-  gap: 10px;
-}
-.grid-container-pages > a{
-  border: 2px solid black;
-  color: black;
-  padding: 5px;
-  text-decoration: none;
-  transition-duration: 0.2s;
-}
-.grid-container-pages > a:hover{
-  border: 2px solid #444;
-  /* border: 2px solid black; 
-  background-color: aliceblue;
-  text-decoration: none;
-} */
