@@ -1,5 +1,3 @@
-// document.getElementById("buregers").innerText = "ham"; 
-
 const videos = {};
 
 async function getUserTimestamps(){
@@ -7,7 +5,6 @@ async function getUserTimestamps(){
     Object.assign(videos, items); //copy to videos
   });
   console.log(videos);
-  // document.getElementById("buregers").innerText = JSON.stringify(videos); 
 }
 
 function createUL(){
@@ -55,16 +52,7 @@ function createUL(){
   }
 }
 
-
-
-
-
-
-// getUserTimestamps().then(createUL());
-
-async function work(){
+(async function (){
   await getUserTimestamps();
   await createUL();
-}
-
-work();
+})();
