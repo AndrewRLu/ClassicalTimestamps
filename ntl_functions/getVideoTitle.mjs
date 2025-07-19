@@ -16,7 +16,6 @@ export const handler = async (event, context) => {
   const youtubeApiKey = process.env.YOUTUBE_API_KEY;
   const callResponse = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&key=${youtubeApiKey}`);
   const callResponseJSON = await callResponse.json();
-  console.log(callResponseJSON.items[0].snippet.title);
 
   return {
     statusCode: 200,
