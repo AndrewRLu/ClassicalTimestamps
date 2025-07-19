@@ -31,14 +31,10 @@ document.querySelector('#saved-timestamps-button').addEventListener('click', fun
 
 // make buttons for parts work, id is time in seconds
 document.querySelector('.part-container').addEventListener('click', async (event) => {
-  console.log("i cliekd buttoned");
-  console.log(event.target.id);
   if(event.target.id == 'save-timestamps-btn'){
     const timestampsString = timestamps.join(', ');
-    console.log(timestampsString);
     document.getElementById("save-timestamps-btn").innerText = "Timestamps Saved!";
     await chrome.storage.sync.set({ [videoID]: {'timestamps':timestampsString, 'videoLink':url , 'title':videoTitle}}).then(() => {
-      console.log("Value is set");
       const timer = setTimeout(() => document.getElementById("save-timestamps-btn").innerText = "Save Timestamps", 2000);
     });
   }else if(event.target.className != 'part-container'){
@@ -47,7 +43,6 @@ document.querySelector('.part-container').addEventListener('click', async (event
 });
 
 async function requestSeek(time){
-  console.log(`requested w ${time}`);
   const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
   chrome.tabs.sendMessage(tab.id, {message: "seek", seconds: time});
 }
@@ -56,7 +51,6 @@ async function requestInfo() {
   //retrive video info from content script
   const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
   const response = await chrome.tabs.sendMessage(tab.id, {message: "getInfo"});
-  console.log(`retrieved: ${response.currentVideoTitle}, ${response.timestamps}, ${response.timestampsSeconds}, ${response.url}`);
   return response;
 }
 
@@ -86,7 +80,6 @@ async function setVideoTitle(videoTitle){
   document.getElementById("title2").textContent = videoTitle;
   document.getElementById("title1div").textContent = " | ";
   document.getElementById("title2div").textContent = " | ";
-  console.log("done setting");
 }
 
 function integerToRoman(num) {
@@ -116,13 +109,11 @@ function integerToRoman(num) {
 }
 
 function temp(){
-  console.log("submitted");
   window.open(chrome.runtime.getURL('saved_timestamps.html'));
 }
 
 document.querySelector('.manual-entry').addEventListener('click', (event) => {
   const eventID = event.target.id;
-  console.log(eventID);
 
   if(eventID == 'cancelButton'){ //cancel
     const container = document.getElementsByClassName("manual-entry")[0];
@@ -142,10 +133,7 @@ document.querySelector('.manual-entry').addEventListener("submit", async (event)
   const formElem = event.target;
   const formData = new FormData(formElem);
   const input = formData.get("userInput");
-  console.log(`user input: ${input}`); 
-  await chrome.storage.sync.set({ [videoID]: {'timestamps':input, 'videoLink':url , 'title':videoTitle}}).then(() => {
-    console.log("Value is set");
-  });
+  await chrome.storage.sync.set({ [videoID]: {'timestamps':input, 'videoLink':url , 'title':videoTitle}});
 
   const container = document.getElementsByClassName("manual-entry")[0];
   container.innerHTML = "";
@@ -155,7 +143,6 @@ document.querySelector('.manual-entry').addEventListener("submit", async (event)
   btn.setAttribute('id', `manual-button`);
   container.appendChild(btn);
 
-  console.log("after await");
   createNewButtons(input);
 });
 
@@ -163,7 +150,6 @@ function createNewButtons(input){
   timestamps = getTimestampsFromComment(input);
   timestampsSeconds = timestampsToSeconds(timestamps);
   createButtons(timestamps, timestampsSeconds);
-  console.log("new buttons created");
 }
 
 function createForm(){
@@ -211,13 +197,11 @@ let videoID;
 requestInfo().then(
   function(res){
     const retrievedInfo = res;
-    console.log(retrievedInfo);
     videoTitle = retrievedInfo.title;
     timestamps = retrievedInfo.timestamps;
     timestampsSeconds = retrievedInfo.timestampsSeconds;
     url = retrievedInfo.url;
     videoID = retrievedInfo.videoID;
-    console.log("got");
     createButtons(timestamps, timestampsSeconds);
     setVideoTitle(videoTitle);
   }

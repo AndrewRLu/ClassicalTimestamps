@@ -1,7 +1,5 @@
 function getVideoID(){
-  console.log(currentVideoURL);
   const videoID = currentVideoURL.searchParams.get("v");
-  console.log(`video id obtained: ${videoID}`);
   return videoID;
 }
 
@@ -17,12 +15,6 @@ async function getFinalTimestamps(comments, numParts){
   for (let comment of comments){
     const timestamps = await getTimestampsFromComment(comment);
     if(timestamps.length >= numParts && timestamps.length < 5){
-      // return timestamps;
-      console.log("comment found")
-      console.log(comment);
-      for(let x of timestamps){
-        console.log(x);
-      }
       return timestamps;
     }
   }
@@ -44,7 +36,6 @@ async function getTimestampsFromDescription(currentVideoID){
   const lines = description.split("\n");
   const timestamps = [];
   for(const line of lines){
-    // console.log(line);
     const timestampsOfLine = getTimestampsFromComment(line);        
     if(timestampsOfLine.length > 0){
       if(timestampsOfLine.length == 2){
@@ -123,30 +114,22 @@ function skipToTime(time){
 }
 
 async function getChapters(){
-  console.log("seeifitworks run")
   const savedVideoIDs = [];
   const initSavedVideoIDs = await chrome.storage.sync.getKeys().then((items) => {
     savedVideoIDs.push(...items);
-    console.log(items)
-    console.log(savedVideoIDs);
   });
   currentVideoID = await getVideoID();
   if(savedVideoIDs.includes(currentVideoID)){
-    console.log("found");
     //used saved info as default
     const retrievedInfo = {};
     const initRetrievedInfo = await chrome.storage.sync.get(currentVideoID).then((items) => {
       Object.assign(retrievedInfo, items);
-      console.log(retrievedInfo);
     });
     currentVideoTitle = retrievedInfo[currentVideoID].title;
     timestamps = getTimestampsFromComment(retrievedInfo[currentVideoID].timestamps);
-    console.log(timestamps);
     timestampsSeconds = timestampsToSeconds(timestamps);
-    console.log(timestampsSeconds);
     currentVideoURL = new URL(retrievedInfo[currentVideoID].videoLink);
   }else{
-    console.log("not found");
     const response = await fetch('https://ytchromeext.netlify.app/.netlify/functions/getVideoTitle', {
       method: 'POST', 
       headers: {
@@ -159,16 +142,12 @@ async function getChapters(){
 
     const responseJSON = await response.json();
     currentVideoTitle = responseJSON.title;
-    console.log(currentVideoTitle);
 
     //try description first
     const descriptionTimestamps = await getTimestampsFromDescription(currentVideoID);
     if(descriptionTimestamps){
-      console.log(`final timestamps: ${descriptionTimestamps}`);
       timestamps = descriptionTimestamps;
       timestampsSeconds = timestampsToSeconds(descriptionTimestamps);
-      console.log(`tts: ${timestampsSeconds}`);
-      console.log("see if works done");
       return;
     }
 
@@ -176,11 +155,8 @@ async function getChapters(){
     for(let numMvt = 3; numMvt > 0; numMvt--){
       const finalTimestamps = await getTimestampsFromComments(currentVideoID, numMvt);
       if(finalTimestamps){
-        console.log(`final timestamps: ${finalTimestamps}`);
         timestamps = finalTimestamps;
         timestampsSeconds = timestampsToSeconds(finalTimestamps);
-        console.log(`tts: ${timestampsSeconds}`);
-        console.log("see if works done");
         return;
       }
     }
@@ -188,8 +164,6 @@ async function getChapters(){
 }
 
 /////////////////// init variables then get chapters ///////////////////
-
-console.log("script began running");
 
 //global variables
 let currentVideoURL = new URL(window.location.href); 
@@ -207,7 +181,6 @@ const videoChangeObserver = new MutationObserver(() => {
   if(currentVideoURL != new URL(window.location.href)){
     clearTimeout(timer);
     currentVideoURL = new URL(window.location.href);
-    console.log("video changed");
     timer = setTimeout(() => getChapters(), 1000);
   }
 }
@@ -219,7 +192,6 @@ videoChangeObserver.observe(document.body, {childList: true});
 
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
-  console.log("message recieved");
   if (request.message === "getInfo")
     sendResponse({title: currentVideoTitle, timestamps: timestamps, timestampsSeconds: timestampsSeconds, url: String(currentVideoURL), videoID: currentVideoID});
   if (request.message === "seek")
@@ -231,19 +203,12 @@ chrome.runtime.onMessage.addListener(
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(
-      `Storage key "${key}" in namespace "${namespace}" changed.`,
-      `Old value was "${JSON.stringify(oldValue)}", new value is "${JSON.stringify(newValue)}".`
-    );
     if(newValue === undefined){
-      console.log("nothing saved, run again");
       getChapters();
     }else{
       currentVideoTitle = newValue.title;
       timestamps = getTimestampsFromComment(newValue.timestamps);
-      // console.log(timestamps);
       timestampsSeconds = timestampsToSeconds(timestamps);
-      // console.log(timestampsSeconds);
       currentVideoURL = new URL(newValue.videoLink);
     }
   }

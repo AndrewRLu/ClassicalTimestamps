@@ -4,15 +4,12 @@ async function getUserTimestamps(){
   const initVideos = await chrome.storage.sync.get().then((items) => {
     Object.assign(videos, items); //copy to videos
   });
-  console.log(videos);
 }
 
 function createUL(){
-  console.log("created");
   const myUL = document.getElementById("myUL");
   
   for(const key in videos){
-    console.log(key);
     const myLI = document.createElement("li");
     const myTitle = document.createElement("div");
     const myLink = document.createElement("a");
