@@ -1,6 +1,6 @@
 {
-  "name": "Youtube Chrome Extension", 
-  "description": "change ",
+  "name": "Classical Timestamps",
+  "description": "Finds timestamps for movements in classical music on YouTube by checking the description and comments.",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {
